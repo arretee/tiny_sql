@@ -1,2 +1,3 @@
 .vscode
-**/*.exe
+src/main.exe
+mynote.txt
