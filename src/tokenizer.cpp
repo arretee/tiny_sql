@@ -145,12 +145,6 @@ bool ts_tokenizer::word_is_literal(std::string word)
 {
     if (word.length() > 0)
         // if last and first char is a quote or the string is a number
-        if ( is_number(word))
-            std::cout << "hello wordl" << std::endl;
-        else
-            std::cout << "hello xxxxx" << std::endl;
-
-        
         if((word[0] == '\'' && word.at(word.length() - 1) == '\'') || is_number(word))
         {
             return true;
