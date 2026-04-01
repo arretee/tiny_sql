@@ -1,18 +1,16 @@
 #include "tokenizer.h"
 
-// -------------- Help Functions --------------
-bool is_number(std::string s);
-
-
-
-
 // -------------- Token Constructors --------------
-Token::Token(): value(""), type(Token::LITERAL){}
+Token::Token(): value(""), type(Token::LITERAL) {}
 Token::Token(std::string value, Token::Type type): value(value), type(type) {}
 
 
-
-
+// -------------- Token Operators --------------
+bool Token::operator==(const Token &token) const
+{
+    if (value == token.value && type == token.type) return true;
+    return false;
+}
 
 // -------------- Tokenizer functions --------------
 std::vector<Token> ts_tokenizer::tokenize(std::string line)
@@ -145,7 +143,7 @@ bool ts_tokenizer::word_is_literal(std::string word)
 {
     if (word.length() > 0)
         // if last and first char is a quote or the string is a number
-        if((word[0] == '\'' && word.at(word.length() - 1) == '\'') || is_number(word))
+        if((word[0] == '\'' && word.at(word.length() - 1) == '\'') || ts_tokenizer::is_number(word))
         {
             return true;
         }
@@ -153,8 +151,7 @@ bool ts_tokenizer::word_is_literal(std::string word)
     return false;
 }
 
-// ----------------------- Help Functions -----------------------
-bool is_number(std::string s) {
+bool ts_tokenizer::is_number(std::string s) {
     if (s.empty()) return false;
     try {
         size_t pos;

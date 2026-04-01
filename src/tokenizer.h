@@ -45,6 +45,10 @@ struct Token{
     // Constructors
     Token();
     Token(std::string value, Token::Type type);
+
+
+    // Operators
+    bool operator==(const Token& token) const;
 };
 
 
@@ -98,6 +102,15 @@ namespace ts_tokenizer {
         output: bool with true of false
     */
     bool word_is_literal(std::string word);
+
+
+    /*
+        Function checks if string as a number
+
+        input: string to check
+        output: true if string is a number, false otherwise.
+    */
+    bool is_number(std::string s);
 }
 
 
