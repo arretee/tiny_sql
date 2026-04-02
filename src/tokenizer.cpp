@@ -131,7 +131,7 @@ bool ts_tokenizer::word_is_symbol(std::string word)
     for(auto symbol: ALL_SYMBOLS_LIST)
     {
         if (word.length() == 1)
-            if (word[0] == symbol)
+            if (word == symbol)
                 return true;
     }
 

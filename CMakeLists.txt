@@ -11,6 +11,7 @@ FetchContent_Declare(
     URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
 )
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
 FetchContent_MakeAvailable(googletest)
 
 # Main project build 
@@ -18,6 +19,7 @@ add_executable( TinySQL
     src/main.cpp 
     src/table.h src/table.cpp 
     src/tokenizer.h src/tokenizer.cpp
+    src/parser.h    src/parser.cpp
 )
 
 
@@ -27,7 +29,9 @@ add_executable( UnitTest
     tests/test_tokenizer.cpp src/tokenizer.h src/tokenizer.cpp
     
 )
+
 target_link_libraries(UnitTest GTest::gtest GTest::gtest_main)
+
 
 include(GoogleTest)
 gtest_discover_tests(UnitTest)

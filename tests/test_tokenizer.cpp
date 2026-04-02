@@ -34,7 +34,7 @@ TEST(tokenizeFunctionTest, BasicInput) {
     EXPECT_EQ(tokens_expect.size(), tokens_get.size());
     for(int i = 0; i < tokens_expect.size() && i < tokens_get.size(); i++)
     {
-        EXPECT_EQ(tokens_get[i], tokens_expect[i]);
+        EXPECT_EQ(tokens_get[i], tokens_expect[i]) << "Error at index " << i;
     }
 }
 
@@ -57,7 +57,7 @@ TEST(tokenizeFunctionTest, BasicInputWithParentheses) {
     EXPECT_EQ(tokens_expect.size(), tokens_get.size());
     for(int i = 0; i < tokens_expect.size() && i < tokens_get.size(); i++)
     {
-        EXPECT_EQ(tokens_get[i], tokens_expect[i]);
+        EXPECT_EQ(tokens_get[i], tokens_expect[i]) << "Error at index " << i;
     }
 }
 
@@ -79,7 +79,7 @@ TEST(tokenizeFunctionTest, EscapingAndQuotes) {
     EXPECT_EQ(tokens_expect.size(), tokens_get.size());
     for(int i = 0; i < tokens_expect.size() && i < tokens_get.size(); i++)
     {
-        EXPECT_EQ(tokens_get[i], tokens_expect[i]);
+        EXPECT_EQ(tokens_get[i], tokens_expect[i]) << "Error at index " << i;;
     }
 }
 

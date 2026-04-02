@@ -4,9 +4,11 @@
 
 #include "table.h"
 #include "tokenizer.h"
+#include "parser.h"
 
 #define EXIT_COMMAND ".quit"
 #define TABLES_NAMES_PRINT_COMMAND ".tables"
+#define TINY_SQL_HELP_COMMAND ".help"
 
 
 // Functions declaration 
@@ -21,7 +23,7 @@ int main()
     int quit_statemen = 0;
     std::string user_input = "";
     std::unordered_map<std::string, Table> tables_map;  // Hash map with all tables is memory
-    std::vector<Token> temp; 
+    std::vector<Token> tokens; 
     
     // Start the program logic
     print_welcome_msg();
@@ -45,17 +47,53 @@ int main()
             {
                 tables_print_meta_command(tables_map);
             }
+            
         }
 
         // Default SQL command 
         else 
         {  
-            temp = ts_tokenizer::tokenize(user_input);
+            tokens = ts_tokenizer::tokenize(user_input);
+            Command* com = ts_parser::parse_tokens(tokens);
 
-            for(int i = 0; i < temp.size(); i++)
+            // temp
+            for(int i = 0; i < tokens.size(); i++)
             {
-                std::cout << temp[i].value << " ----> Type: " << temp[i].type << std::endl;
+                std::cout << tokens[i].value << " ----> Type: " << tokens[i].type << std::endl;
             }
+            std::cout << "\n\n\n";
+
+            if (com != nullptr)
+            {   
+                // Command and table name
+                std::cout << com -> command << std::endl;
+                std::cout << com -> table_name << std::endl;
+
+                // Default args
+                for(int i = 0; i < com->arguments.size(); i++) {
+                    std::cout << com->arguments[i] << "\t";
+                }
+                
+                std::cout << std::endl;
+
+
+                // if there is a special args
+                for (const auto& pair : com -> special_args) {
+                    std::cout << pair.first << ": ";
+                    for (int i = 0; i < com -> special_args[pair.first].size(); i++)
+                    {
+                        std::cout << com -> special_args[pair.first][i] << ", ";
+                    }
+                }
+
+
+                std::cout << std::endl;
+
+                delete com;
+            }
+            else std::cout<< "\n\nnullptr\n\n";
+            //temp
+
         }
     }
     
@@ -82,10 +120,30 @@ void print_welcome_msg() {
     std::cout << "Let's start ? You can use basic SQL statements like:" << std::endl;
     std::cout << "CREATE TABLE, INSERT INTO, SELECT, DELETE FROM, DROP TABLE" << std::endl;
     std::cout << "Algorithm uses SQL Escaping with char "<< ESCAPING_CHAR << " to escape chars inside TEXT data type" << std::endl;
-    std::cout << "Also there is 2 commands not from SQL:" << std::endl;
+    std::cout << "Also there is 3 commands not from SQL:" << std::endl;
     std::cout << TABLES_NAMES_PRINT_COMMAND << " -> Prints all tables names" << std::endl;
+    std::cout << TINY_SQL_HELP_COMMAND << " -> Prints help info for TinySQL REPL" << std::endl;
     std::cout << EXIT_COMMAND <<" -> Program exit" << std::endl;
 }
+
+/*
+    Function prints help message to user for TinySQL 
+
+    input: none
+    output: none
+*/
+void print_help_message() {
+    std::cout << std::endl;
+    std::cout << "CREATE TABLE <name> (<col> <type>, ...) -> To create a table" << std::endl;
+    std::cout << "INSERT INTO <name> VALUES (...) -> to insert values into a specific table(number of values and types, have to fit number of columns and their types)" << std::endl;
+    std::cout << "CREATE TABLE <name> (<col> <type>, ...) -> To create a table" << std::endl;
+    std::cout << "SELECT <cols|*> FROM <name> -> prints matching columns for all rows. * symbol for all columns" << std::endl;
+    std::cout << "DELETE FROM <name> WHERE <col> = <value> -> Removes matching rows from table" << std::endl;
+    std::cout << "DROP TABLE <name> -> To delete a table" << std::endl;
+    
+    std::cout << "\nGood Luck" << std::endl;
+}
+
 
 /*
     Function prints exit message to user for TinySQL 

@@ -28,7 +28,7 @@ struct Table {
     // Constructors
     Table(std::string name, std::vector <Column> columns);
     Table(std::string name, std::vector <Column> columns, std::vector<std::vector<Value>> rows);
-
+    
 } ;
 
 

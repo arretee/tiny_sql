@@ -25,8 +25,8 @@
 
 
 // -------------- Symbols of TinySQL --------------
-#define SYMBOL_EQUATION '='
-#define SYMBOL_ALL '*'
+#define SYMBOL_EQUATION "="
+#define SYMBOL_ALL "*"
 
 #define ALL_SYMBOLS_LIST {SYMBOL_EQUATION, SYMBOL_ALL}
 
