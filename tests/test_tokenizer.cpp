@@ -15,7 +15,7 @@ TEST(TokenStructTest, CheckConstructors) {
 }
 
 // -------------- ts_tokenizer Functions Test --------------
-// -------------- tokenize Functions Test --------------
+// -------------- tokenize Function Test --------------
 TEST(tokenizeFunctionTest, BasicInput) { 
     // Basic check of function
     std::string line = "SELECT * FROM users WHERE id = 5";

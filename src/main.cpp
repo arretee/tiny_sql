@@ -34,7 +34,7 @@ int main()
         
         // Check if input is more than 0 chars
         if (user_input.length() == 0)
-            std::cout << "ERROR, inputed string length is 0." << std::endl;
+            std::cout << "TinySQL input ERROR: inputed string length is 0." << std::endl;
         
         // Check for meta command
         else if (user_input[0] == '.')
@@ -47,7 +47,6 @@ int main()
             {
                 tables_print_meta_command(tables_map);
             }
-            
         }
 
         // Default SQL command 

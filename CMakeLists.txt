@@ -27,7 +27,7 @@ add_executable( TinySQL
 enable_testing()
 add_executable( UnitTest
     tests/test_tokenizer.cpp src/tokenizer.h src/tokenizer.cpp
-    
+    tests/test_parser.cpp src/parser.h src/parser.cpp
 )
 
 target_link_libraries(UnitTest GTest::gtest GTest::gtest_main)

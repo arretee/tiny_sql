@@ -333,7 +333,7 @@ Command *ts_parser::parse_drop_table(std::vector<Token>& tokens) {
     int i = 0;
 
     // Check for minimum size of command
-    if(tokens_size == 3)
+    if(tokens_size != 3)
     {
         std::cout << "TinySQL Parser error: DROP command need exactly 3 words" << std::endl;
         std::cout << "DROP TABLE <name>" << std::endl;
@@ -360,7 +360,7 @@ std::vector<std::string> ts_parser::parse_where_special_arg(std::vector<Token> &
 
     if(tokens_size - where_token_index < 4)
     {
-        std::cout << "TinySQL Parser error: Where KEYWORD requires 3 aruments" << std::endl; 
+        std::cout << "TinySQL Parser error: WHERE keyword requires 3 arguments" << std::endl; 
         std::cout << "... WHERE <col_name> = <value>" << std::endl; 
         return std::vector<std::string>();
     }
