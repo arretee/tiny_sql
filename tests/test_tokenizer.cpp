@@ -40,17 +40,17 @@ TEST(tokenizeFunctionTest, BasicInput) {
 
 TEST(tokenizeFunctionTest, BasicInputWithParentheses) { 
     // Check with parentheses
-    std::string line = "CREATE TABLE users (col1 INT, col2 TEXT, col3 INT)";
+    std::string line = "CREATE TABLE users (col1 INTEGER, col2 TEXT, col3 INTEGER)";
     std::vector<Token> tokens_expect = {
-        Token("CREATE", Token::KEYWORD), 
-        Token("TABLE", Token::KEYWORD), 
+        Token(KEYWORD_CREATE, Token::KEYWORD), 
+        Token(KEYWORD_TABLE, Token::KEYWORD), 
         Token("users", Token::IDENTIFIER), 
         Token("col1", Token::IDENTIFIER), 
-        Token("INT", Token::KEYWORD), 
+        Token(KEYWROD_DATATYPE_INTEGER, Token::KEYWORD), 
         Token("col2", Token::IDENTIFIER), 
-        Token("TEXT", Token::KEYWORD), 
+        Token(KEYWROD_DATATYPE_TEXT, Token::KEYWORD), 
         Token("col3", Token::IDENTIFIER), 
-        Token("INT", Token::KEYWORD), 
+        Token(KEYWROD_DATATYPE_INTEGER, Token::KEYWORD), 
     };
     std::vector<Token> tokens_get = ts_tokenizer::tokenize(line);
 
@@ -66,10 +66,10 @@ TEST(tokenizeFunctionTest, EscapingAndQuotes) {
     // Check for Escaping and quotes
     std::string line = "INSERT INTO users VALUES ('user1', 123441, 'Jack\\'')";
     std::vector<Token> tokens_expect = {
-        Token("INSERT", Token::KEYWORD), 
-        Token("INTO", Token::KEYWORD), 
+        Token(KEYWORD_INSERT, Token::KEYWORD), 
+        Token(KEYWORD_INTO, Token::KEYWORD), 
         Token("users", Token::IDENTIFIER), 
-        Token("VALUES", Token::KEYWORD), 
+        Token(KEYWORD_VALUES, Token::KEYWORD), 
         Token("'user1'", Token::LITERAL), 
         Token("123441", Token::LITERAL), 
         Token("'Jack''", Token::LITERAL), 
@@ -90,8 +90,8 @@ TEST(split_stringFunctionTest, FunctionWorks) {
     std::vector<std::string> splited1 = {"SELECT", "*", "FROM", "users", "WHERE", "id", "=", "5"};
     
     // Check with parentheses
-    std::string line2 = "CREATE TABLE users (col1 INT, col2 TEXT, col3 INT)";
-    std::vector<std::string> splited2 = {"CREATE", "TABLE", "users", "col1", "INT", "col2", "TEXT", "col3", "INT"};
+    std::string line2 = "CREATE TABLE users (col1 INTEGER, col2 TEXT, col3 INTEGER)";
+    std::vector<std::string> splited2 = {"CREATE", "TABLE", "users", "col1", "INTEGER", "col2", "TEXT", "col3", "INTEGER"};
 
     // Check for Escaping and quotes
     std::string line3 = "INSERT INTO users VALUES ('user1', 123441, 'Jack\\'')";
@@ -146,12 +146,12 @@ TEST(word_is_literalFunctionTest, FunctionWorks) {
     EXPECT_EQ(ts_tokenizer::word_is_literal("222"), true);
     EXPECT_EQ(ts_tokenizer::word_is_literal("-1234"), true);
 
-    // Empry Input Test
+    // False Input Test
     EXPECT_EQ(ts_tokenizer::word_is_literal("CREATE"), false);
     EXPECT_EQ(ts_tokenizer::word_is_literal("a12345a"), false);
     EXPECT_EQ(ts_tokenizer::word_is_literal("My Name is Gtest"), false);
 
-    // False Output Test
+    // Empty Input Test
     EXPECT_EQ(ts_tokenizer::word_is_literal(""), false);
 }
 
@@ -163,7 +163,7 @@ TEST(is_numberFunctionTest, FunctionWorks) {
     EXPECT_EQ(ts_tokenizer::is_number("1234"), true);
     EXPECT_EQ(ts_tokenizer::is_number("0003"), true);
 
-    // Empry Input Test
+    // Empty Input Test
     EXPECT_EQ(ts_tokenizer::is_number(""), false);
 
     // False Output Test

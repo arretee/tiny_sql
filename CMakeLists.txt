@@ -20,6 +20,9 @@ add_executable( TinySQL
     src/table.h src/table.cpp 
     src/tokenizer.h src/tokenizer.cpp
     src/parser.h    src/parser.cpp
+    src/engine.h    src/engine.cpp
+    src/printer.h   src/printer.cpp
+
 )
 
 

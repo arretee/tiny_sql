@@ -5,6 +5,8 @@
 #include "table.h"
 #include "tokenizer.h"
 #include "parser.h"
+#include "engine.h"
+#include "printer.h"
 
 #define EXIT_COMMAND ".quit"
 #define TABLES_NAMES_PRINT_COMMAND ".tables"
@@ -15,7 +17,6 @@
 void print_welcome_msg();
 void print_exit_message();
 std::string get_user_input(std::string message);
-void tables_print_meta_command(std::unordered_map<std::string, Table>& ref);
 
 int main()
 {
@@ -24,6 +25,7 @@ int main()
     std::string user_input = "";
     std::unordered_map<std::string, Table> tables_map;  // Hash map with all tables is memory
     std::vector<Token> tokens; 
+    Command* com;
     
     // Start the program logic
     print_welcome_msg();
@@ -45,7 +47,7 @@ int main()
             }
             else if (user_input == TABLES_NAMES_PRINT_COMMAND)
             {
-                tables_print_meta_command(tables_map);
+                ts_printer::tables_print_meta_command(tables_map);
             }
         }
 
@@ -53,46 +55,11 @@ int main()
         else 
         {  
             tokens = ts_tokenizer::tokenize(user_input);
-            Command* com = ts_parser::parse_tokens(tokens);
-
-            // temp
-            for(int i = 0; i < tokens.size(); i++)
-            {
-                std::cout << tokens[i].value << " ----> Type: " << tokens[i].type << std::endl;
-            }
-            std::cout << "\n\n\n";
-
-            if (com != nullptr)
-            {   
-                // Command and table name
-                std::cout << com -> command << std::endl;
-                std::cout << com -> table_name << std::endl;
-
-                // Default args
-                for(int i = 0; i < com->arguments.size(); i++) {
-                    std::cout << com->arguments[i] << "\t";
-                }
-                
-                std::cout << std::endl;
+            com = ts_parser::parse_tokens(tokens);
 
 
-                // if there is a special args
-                for (const auto& pair : com -> special_args) {
-                    std::cout << pair.first << ": ";
-                    for (int i = 0; i < com -> special_args[pair.first].size(); i++)
-                    {
-                        std::cout << com -> special_args[pair.first][i] << ", ";
-                    }
-                }
-
-
-                std::cout << std::endl;
-
-                delete com;
-            }
-            else std::cout<< "\n\nnullptr\n\n";
-            //temp
-
+            ts_engine::execute_command(com, tables_map);
+            delete com;
         }
     }
     
@@ -173,21 +140,4 @@ std::string get_user_input(std::string message) {
     std::getline(std::cin, input);
 
     return input;
-}
-
-
-/*
-    Function that prints all tables names.
-
-    input: reference to unordored map of tables
-    output: none
-*/
-void tables_print_meta_command(std::unordered_map<std::string, Table>& ref) {
-    std::cout << "Tables names list:" << std::endl;
-
-    for (const auto& pair : ref){
-        std::cout << pair.first << std::endl;
-    }
-
-    std::cout << std::endl;
 }

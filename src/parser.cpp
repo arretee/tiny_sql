@@ -93,14 +93,14 @@ Command *ts_parser::parse_create_table(std::vector<Token>& tokens) {
         // Check if exists type for column
         if(i + 1 < tokens_size){
             // Check if type is valid
-            if (tokens.at(i + 1).type == Token::KEYWORD)
+            if (tokens.at(i + 1).type == Token::KEYWORD || (tokens.at(i + 1).value == KEYWROD_DATATYPE_INTEGER || tokens.at(i + 1).value == KEYWROD_DATATYPE_TEXT))
             {
                 arguments.push_back(tokens.at(i + 1).value);
             }
             else
             {
                 std::cout << "TinySQL Parser error: type is not correct" << std::endl;
-                std::cout << "type: INT for integer, TEXT for text" << std::endl;
+                std::cout << "type: INTEGER for integer, TEXT for text" << std::endl;
                 return nullptr;
             }
         }
@@ -264,7 +264,7 @@ Command *ts_parser::parse_select(std::vector<Token>& tokens) {
 
 
 
-    return new Command(COMMAND_SELECT_FROM, table_name, arguments, special_args);
+    return new Command(COMMAND_SELECT, table_name, arguments, special_args);
 }
 
 Command *ts_parser::parse_delete_from(std::vector<Token>& tokens) { 
@@ -382,7 +382,7 @@ std::vector<std::string> ts_parser::parse_where_special_arg(std::vector<Token> &
         std::cout << "... WHERE <col_name> = <value>" << std::endl;
         return std::vector<std::string>();
     }
-    args.push_back(tokens.at(where_token_index + 2).value); // add col name to args
+    args.push_back(tokens.at(where_token_index + 2).value); // add symbol to args
 
     // Check for correct value
     if (tokens.at(where_token_index + 3).type != Token::LITERAL)
@@ -392,7 +392,7 @@ std::vector<std::string> ts_parser::parse_where_special_arg(std::vector<Token> &
         std::cout << "literal: number or text inside singles quotes" << std::endl;
         return std::vector<std::string>();
     }
-    args.push_back(tokens.at(where_token_index + 3).value); // add col name to args
+    args.push_back(tokens.at(where_token_index + 3).value); // add value to args
 
     return args;
 }

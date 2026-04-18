@@ -10,7 +10,7 @@
 // Parser Commads
 #define COMMAND_CREATE_TABLE "CREATE TABLE"
 #define COMMAND_INSERT_INTO_VALUES "INSERT INTO VALUES"
-#define COMMAND_SELECT_FROM "SELECT FROM"
+#define COMMAND_SELECT "SELECT"
 #define COMMAND_DELETE_FROM "DELETE FROM"
 #define COMMAND_DROP_TABLE "DROP TABLE"
 
@@ -20,6 +20,17 @@
 
 
 // Command struct 
+
+/*
+    // Variables
+    std::string command;                        // One of defined strings in parser.h for engine commands
+    
+    std::string table_name;                     // Table name to work with
+    
+    std::vector<std::string> arguments;         // Default args like col names, values and so on. used for basic command without extintions of WHERE, ORDER BY
+    
+    std::unordered_map<std::string, std::vector<std::string>> special_args; // Special args for WHERE, ORDER BY and similars. 
+*/
 struct Command{
     // Variables
     std::string command;                        // One of defined strings in parser.h for engine commands
@@ -32,7 +43,13 @@ struct Command{
 
 };
 
-
+/*
+    Parser main purpose: Create from tokens that ts_tokenizer created, command for ts_engine.
+    parser is responsible for get needed command, table name.
+    parser is responsible for check that arguments got in needed order and count.
+    parser is responsible to get the special args if needed for command.
+    special args -> WHERE, ORDER BY .... 
+*/
 namespace ts_parser{
     // -------------- Parser Commands --------------
     /*

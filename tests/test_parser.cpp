@@ -56,14 +56,14 @@ TEST(parse_create_tableFunctionTest, FunctionWorks) {
         Token(KEYWORD_TABLE, Token::KEYWORD),
         Token("users", Token::IDENTIFIER),
         Token("col1", Token:: IDENTIFIER),
-        Token(KEYWROD_DATATYPE_INT, Token::KEYWORD),
+        Token(KEYWROD_DATATYPE_INTEGER, Token::KEYWORD),
         Token("col2", Token:: IDENTIFIER),
         Token(KEYWROD_DATATYPE_TEXT, Token::KEYWORD),
     };
 
     expected_command = COMMAND_CREATE_TABLE;
     expected_table_name = "users";
-    expected_args = {"col1", KEYWROD_DATATYPE_INT, "col2", KEYWROD_DATATYPE_TEXT};
+    expected_args = {"col1", KEYWROD_DATATYPE_INTEGER, "col2", KEYWROD_DATATYPE_TEXT};
     expected_special_args = std::unordered_map<std::string, std::vector<std::string>>(); 
 
     c = ts_parser::parse_create_table(tokens);  // Call function 
@@ -152,7 +152,7 @@ TEST(parse_selectFunctionTest, FunctionWorks) {
         Token("users", Token::IDENTIFIER),
     };
 
-    expected_command = COMMAND_SELECT_FROM;
+    expected_command = COMMAND_SELECT;
     expected_table_name = "users";
     expected_args = {SYMBOL_ALL};
     expected_special_args = std::unordered_map<std::string, std::vector<std::string>>(); 
@@ -182,7 +182,7 @@ TEST(parse_selectFunctionTest, FunctionWorks) {
         Token("users", Token::IDENTIFIER),
     };
 
-    expected_command = COMMAND_SELECT_FROM;
+    expected_command = COMMAND_SELECT;
     expected_table_name = "users";
     expected_args = {"col1", "col2", "col3"};
     expected_special_args = std::unordered_map<std::string, std::vector<std::string>>(); 
@@ -217,7 +217,7 @@ TEST(parse_selectFunctionTest, FunctionWorks) {
         Token("5", Token::LITERAL),
     };
 
-    expected_command = COMMAND_SELECT_FROM;
+    expected_command = COMMAND_SELECT;
     expected_table_name = "users";
     expected_args = {"col1", "col2", "col3"};
     expected_special_args = std::unordered_map<std::string, std::vector<std::string>>(); 
