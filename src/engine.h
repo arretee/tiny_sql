@@ -81,11 +81,21 @@ namespace ts_engine {
         output: null
     */
     void execute_drop_table(Command* com, std::unordered_map<std::string, Table>& tables);
+
+
+    // -------------- Special Arguments Functions --------------
+    /*
+        Function converts where argument to list of indexes of rows that matches the conditions.
+
+        input: command pointer, table reference
+        output: vector of indexes that matches the conditions. 
+    */
+    std::vector<int> execute_where_argument(Command* com, Table& table);
     
     
 
 
-    // -------------- Check Functions --------------
+    // -------------- Help Functions --------------
     /*
         Funtion gets an string with Literal, and get the type of the literal.
         *Expected that ts_tokenizer is specified a word like LITERAL! on tokenize step. 
@@ -94,6 +104,21 @@ namespace ts_engine {
         retunrn: Column::Type 
     */
     Column::Type get_literal_type(std::string literal);
+
+
+    
+
+
+
+    /*
+        Function compare between 2 Values by the given operator.
+
+
+        input: 2 values 
+        output: true or false   
+    */
+    bool compare_values(const Value& a, const Value& b, Operator op);
+
 }
 
 

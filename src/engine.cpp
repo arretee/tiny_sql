@@ -130,20 +130,7 @@ void ts_engine::execute_insert_into_values(Command *com, std::unordered_map<std:
             return;
         }
 
-
-        // Check if insert the arg like int or like string
-        if (arg_type == Column::INTEGER)
-        {
-            // Convert and insert like int
-            integer_arg = std::stoi(com->arguments.at(i));
-            row.push_back(integer_arg);
-
-        }
-        else    // Insert like string 
-        {
-            com->arguments.at(i) = com->arguments.at(i).substr(1, com->arguments.at(i).length() - 2); // remove quotes in db
-            row.push_back(com->arguments.at(i));
-        }
+        row.push_back(ts_parser::convert_to_value(com->arguments.at(i)));
     }
 
     tables[com->table_name].rows.push_back(row);
@@ -156,13 +143,6 @@ void ts_engine::execute_select(Command *com, std::unordered_map<std::string, Tab
 
     bool found_status = false;
     std::unordered_set<std::string> founded_names;
-
-    std::string col_name;
-    int col_index;
-    std::string target_str;
-
-    Value row_value;
-    std::string row_str;
 
 
     // Check if command is correct 
@@ -225,57 +205,13 @@ void ts_engine::execute_select(Command *com, std::unordered_map<std::string, Tab
 
 
     // Check special args
-    if (com->special_args.size() == 0)
+    if (com->whereClause.condition.column_name == "")
         for(int i = 0; i < tables[com->table_name].rows.size(); i++)
             row_indexes.push_back(i);
 
-    else if (com->special_args.find(KEYWORD_WHERE) != com->special_args.end())
+    else if (com->whereClause.condition.column_name != "")
     {
-        // Get Column name target
-        col_name = com->special_args[KEYWORD_WHERE][0];
-
-        // Get target value 
-        target_str = com->special_args[KEYWORD_WHERE][2];
-
-
-        // Find needed column index
-        bool found_status = false;
-        for (int i = 0; i < tables[com->table_name].columns.size(); i++)
-        {
-            if(col_name == tables[com->table_name].columns[i].name)
-            {
-                found_status = true;
-                col_index = i;
-                break;
-            }
-        }
-
-        if (found_status == false)
-        {
-            std::cout << "TinySQL Engine ERROR: WHERE col name not found" << std::endl;
-            return;
-        }
-        
-
-        // Find all matching rows
-        for(int i = 0; i < tables[com->table_name].rows.size(); i++)
-        {
-            // Get data from variant
-            row_value = tables[com->table_name].rows.at(i).at(col_index);    // Get value from row
-
-            if (std::holds_alternative<std::string>(row_value)) {
-                row_str = '\'' + std::get<std::string>(row_value) + '\'';  // Add quotes to fit the target value
-            }
-            if (std::holds_alternative<int>(row_value)) {
-                row_str = std::to_string(std::get<int>(row_value));        // No need to add quotes to INTEGER
-            }
-
-
-            if (row_str == target_str)
-            {
-                row_indexes.push_back(i);
-            }
-        }
+        row_indexes = execute_where_argument(com, tables[com->table_name]);
     }
     
     
@@ -302,68 +238,18 @@ void ts_engine::execute_delete_from(Command *com, std::unordered_map<std::string
     }
 
     std::vector <int> row_indexes; 
-    std::string col_name;
-    int col_index;
-    std::string target_str;
-
-    Value row_value;
-    std::string row_str;
 
 
     // If Where is not used -> remove all rows
-    if (com->special_args.size() == 0)
+    if (com->whereClause.condition.column_name == "")
     {
         tables[com->table_name].rows.clear();
         tables[com->table_name].rows.shrink_to_fit();
     
     }
-    else if (com->special_args.find(KEYWORD_WHERE) != com->special_args.end())
+    else if (com->whereClause.condition.column_name != "")
     {
-        // Get Column name target
-        col_name = com->special_args[KEYWORD_WHERE][0];
-
-        // Get target value 
-        target_str = com->special_args[KEYWORD_WHERE][2];
-
-
-        // Find needed column index
-        bool found_status = false;
-        for (int i = 0; i < tables[com->table_name].columns.size(); i++)
-        {
-            if(col_name == tables[com->table_name].columns[i].name)
-            {
-                found_status = true;
-                col_index = i;
-                break;
-            }
-        }
-
-        if (found_status == false)
-        {
-            std::cout << "TinySQL Engine ERROR: WHERE col name not found" << std::endl;
-            return;
-        }
-        
-
-        // Find all matching rows
-        for(int i = 0; i < tables[com->table_name].rows.size(); i++)
-        {
-            // Get data from variant
-            row_value = tables[com->table_name].rows.at(i).at(col_index);    // Get value from row
-
-            if (std::holds_alternative<std::string>(row_value)) {
-                row_str = '\'' + std::get<std::string>(row_value) + '\'';  // Add quotes to fit the target value
-            }
-            if (std::holds_alternative<int>(row_value)) {
-                row_str = std::to_string(std::get<int>(row_value));        // No need to add quotes to INTEGER
-            }
-
-
-            if (row_str == target_str)
-            {
-                row_indexes.push_back(i);   // Store all indexes to remove 
-            }
-        }
+        row_indexes = execute_where_argument(com, tables[com->table_name]);
 
 
         // Remove all matching rows 
@@ -395,6 +281,57 @@ void ts_engine::execute_drop_table(Command *com, std::unordered_map<std::string,
     tables.erase(com->table_name);
 }
 
+std::vector<int> ts_engine::execute_where_argument(Command *com, Table &table)
+{
+    std::vector <int> row_indexes; 
+
+    std::string col_name;
+    int col_index;
+
+    Value row_value;
+    Value target_value;
+
+    // Get Column name target
+    col_name = com->whereClause.condition.column_name;
+
+    // Get target value 
+    target_value = com->whereClause.condition.value;
+
+
+    // Find needed column index
+    bool found_status = false;
+    for (int i = 0; i < table.columns.size(); i++)
+    {
+        if(col_name == table.columns[i].name)
+        {
+            found_status = true;
+            col_index = i;
+            break;
+        }
+    }
+
+    if (found_status == false)
+    {
+        std::cout << "TinySQL Engine ERROR: WHERE col name not found" << std::endl;
+        return std::vector<int>();
+    }
+    
+
+    // Find all matching rows
+    for(int i = 0; i < table.rows.size(); i++)
+    {
+        // Get data from variant
+        row_value = table.rows.at(i).at(col_index);    // Get value from row
+
+
+        if (compare_values(row_value, target_value, com->whereClause.condition.op))
+        {
+            row_indexes.push_back(i);
+        }
+    }
+
+    return row_indexes;
+}
 
 Column::Type ts_engine::get_literal_type(std::string literal)    
 {
@@ -409,4 +346,47 @@ Column::Type ts_engine::get_literal_type(std::string literal)
     }
 
 
+}
+
+bool ts_engine::compare_values(const Value &a, const Value &b, Operator op)
+{
+    if (a.index() != b.index())
+    {
+        return false;
+    }
+
+
+    // Int compares 
+    if (std::holds_alternative<int>(a)) {
+        int av = std::get<int>(a);
+        int bv = std::get<int>(b);
+
+        switch (op) {
+            case Operator::EQ:  return av == bv;
+            case Operator::NEQ: return av != bv;
+            case Operator::GT:  return av > bv;
+            case Operator::LT:  return av < bv;
+            case Operator::GTE: return av >= bv;
+            case Operator::LTE: return av <= bv;
+        }
+    }
+
+    if (std::holds_alternative<std::string>(a)) {
+        const auto& av = std::get<std::string>(a);
+        const auto& bv = std::get<std::string>(b);
+
+        switch (op) {
+            case Operator::EQ:  return av == bv;
+            case Operator::NEQ: return av != bv;
+            case Operator::GT:  return av > bv;
+            case Operator::LT:  return av < bv;
+            case Operator::GTE: return av >= bv;
+            case Operator::LTE: return av <= bv;
+        }
+    }
+
+
+
+
+    return false;
 }

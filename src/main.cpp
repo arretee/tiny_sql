@@ -104,7 +104,7 @@ void print_help_message() {
     std::cout << "INSERT INTO <name> VALUES (...) -> to insert values into a specific table(number of values and types, have to fit number of columns and their types)" << std::endl;
     std::cout << "CREATE TABLE <name> (<col> <type>, ...) -> To create a table" << std::endl;
     std::cout << "SELECT <cols|*> FROM <name> -> prints matching columns for all rows. * symbol for all columns" << std::endl;
-    std::cout << "DELETE FROM <name> WHERE <col> = <value> -> Removes matching rows from table" << std::endl;
+    std::cout << "DELETE FROM <name> WHERE <col> <symbol> <value> -> Removes matching rows from table" << std::endl;
     std::cout << "DROP TABLE <name> -> To delete a table" << std::endl;
     
     std::cout << "\nGood Luck" << std::endl;

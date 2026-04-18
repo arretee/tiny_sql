@@ -25,7 +25,7 @@ parser returns struct Command, this command can be executed by engine.
 Command.command -> One of defined strings in parser.h for engine commands
 Command.table_name -> name of table to work with
 Command.arguments -> default arguments of the command
-Command.special_args -> arguments of WHERE extintion for example. (WHERE, ORDER BY.....)
+Command.WhereClause -> extructions to Where command 
 
 ## engine
 engine gets the command that parser created, and execute it. 

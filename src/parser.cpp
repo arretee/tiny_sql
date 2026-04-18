@@ -1,8 +1,27 @@
 #include "parser.h"
 
-Command::Command(std::string command, std::string table_name, std::vector<std::string> arguments): command(command), table_name(table_name), arguments(arguments), special_args(std::unordered_map<std::string, std::vector<std::string>>()){ }
-Command::Command(std::string command, std::string table_name, std::vector<std::string> arguments, std::unordered_map<std::string, std::vector<std::string>> special_args): command(command), table_name(table_name), arguments(arguments), special_args(special_args){ }
+// -------------- Structs --------------
+Command::Command(std::string command, std::string table_name, std::vector<std::string> arguments): command(command), table_name(table_name), arguments(arguments), whereClause(WhereClause()){ }
+Command::Command(std::string command, std::string table_name, std::vector<std::string> arguments, WhereClause whereClause): command(command), table_name(table_name), arguments(arguments), whereClause(whereClause){ }
 
+
+
+Condition::Condition(): column_name(""), op(Operator::EQ), value(0) {}
+Condition::Condition(std::string column_name, Operator op, Value value) : column_name(column_name), op(op), value(value) {}
+
+
+WhereClause::WhereClause(): condition(Condition()){}
+WhereClause::WhereClause(Condition condition): condition(condition){}
+
+
+
+
+
+
+
+
+
+// -------------- ts_parser function --------------
 
 Command *ts_parser::parse_tokens(std::vector<Token> &tokens)
 {
@@ -42,8 +61,6 @@ Command *ts_parser::parse_tokens(std::vector<Token> &tokens)
     std::cout << "TinySQL Parser error: Command not found by Keyword, use .help to find usefull instuctions." << std::endl;
     return nullptr;
 }
-
-
 
 Command *ts_parser::parse_create_table(std::vector<Token>& tokens) {
     // Commnads:
@@ -173,7 +190,7 @@ Command *ts_parser::parse_select(std::vector<Token>& tokens) {
 
     std::string table_name;
     std::vector<std::string> arguments;
-    std::unordered_map<std::string, std::vector<std::string>> special_args;
+    WhereClause whereClause;
 
     size_t tokens_size = tokens.size();
     int i = 0;
@@ -247,10 +264,10 @@ Command *ts_parser::parse_select(std::vector<Token>& tokens) {
     {
         if(tokens.at(i).type == Token::KEYWORD && tokens.at(i).value == KEYWORD_WHERE)
         {
-            special_args[KEYWORD_WHERE] = parse_where_special_arg(tokens, i); // Parse the special arguments of where
+            whereClause = parse_where_special_arg(tokens, i); // Parse the special arguments of where
 
             // Check if WHERE parse is completed without errors
-            if (special_args[KEYWORD_WHERE].size() == 0)
+            if (whereClause.condition.column_name == "")
                 return nullptr;
         }
 
@@ -264,7 +281,7 @@ Command *ts_parser::parse_select(std::vector<Token>& tokens) {
 
 
 
-    return new Command(COMMAND_SELECT, table_name, arguments, special_args);
+    return new Command(COMMAND_SELECT, table_name, arguments, whereClause);
 }
 
 Command *ts_parser::parse_delete_from(std::vector<Token>& tokens) { 
@@ -274,7 +291,7 @@ Command *ts_parser::parse_delete_from(std::vector<Token>& tokens) {
 
     std::string table_name;
     std::vector<std::string> arguments;
-    std::unordered_map<std::string, std::vector<std::string>> special_args;
+    WhereClause whereClause;
 
     size_t tokens_size = tokens.size();
     int i = 0;
@@ -303,10 +320,10 @@ Command *ts_parser::parse_delete_from(std::vector<Token>& tokens) {
         // Check if there is a WHERE SPEC arg
         if(tokens.at(3).type == Token::KEYWORD && tokens.at(3).value == KEYWORD_WHERE)
         {
-            special_args[KEYWORD_WHERE] = parse_where_special_arg(tokens, 3); // Parse the special arguments of where
+            whereClause = parse_where_special_arg(tokens, 3); // Parse the special arguments of where
 
             // Check if WHERE parse is completed without errors
-            if (special_args[KEYWORD_WHERE].size() == 0)
+            if (whereClause.condition.column_name == "")
                 return nullptr;
         }
 
@@ -320,7 +337,7 @@ Command *ts_parser::parse_delete_from(std::vector<Token>& tokens) {
 
 
 
-    return new Command(COMMAND_DELETE_FROM, table_name, arguments, special_args);
+    return new Command(COMMAND_DELETE_FROM, table_name, arguments, whereClause);
 }
 
 Command *ts_parser::parse_drop_table(std::vector<Token>& tokens) { 
@@ -353,16 +370,16 @@ Command *ts_parser::parse_drop_table(std::vector<Token>& tokens) {
     return new Command(COMMAND_DROP_TABLE, table_name, arguments);
 }
 
-std::vector<std::string> ts_parser::parse_where_special_arg(std::vector<Token> &tokens, int where_token_index)
+WhereClause ts_parser::parse_where_special_arg(std::vector<Token> &tokens, int where_token_index)
 {
     size_t tokens_size = tokens.size();
-    std::vector<std::string> args; 
+    WhereClause clause;
 
     if(tokens_size - where_token_index < 4)
     {
         std::cout << "TinySQL Parser error: WHERE keyword requires 3 arguments" << std::endl; 
         std::cout << "... WHERE <col_name> = <value>" << std::endl; 
-        return std::vector<std::string>();
+        return WhereClause();
     }
 
     // Chekc for col name is IDENTIFIER
@@ -371,18 +388,25 @@ std::vector<std::string> ts_parser::parse_where_special_arg(std::vector<Token> &
         std::cout << "TinySQL Parser error: column name is not Identifier" << std::endl;
         std::cout << "Invalid column name: " << tokens.at(where_token_index + 1).value << std::endl;
         std::cout << "Identifier: name of something, do not use scrath numbers or single quotes for Identifier" << std::endl;
-        return std::vector<std::string>();
+        return WhereClause();
     }
-    args.push_back(tokens.at(where_token_index + 1).value); // add col name to args
+    clause.condition.column_name = tokens.at(where_token_index + 1).value;
+
 
     // Check for correct symbol
-    if (tokens.at(where_token_index + 2).value != SYMBOL_EQUATION)
+    if (tokens.at(where_token_index + 2).type != Token::SYMBOL || tokens.at(where_token_index + 2).value  == SYMBOL_ALL )
     {
-        std::cout << "TinySQL Parser error: not used EQUATION Symbol" << std::endl;
-        std::cout << "... WHERE <col_name> = <value>" << std::endl;
-        return std::vector<std::string>();
+        std::cout << "TinySQL Parser error: not used logical symbol: =, !=, >, >=, <, <=" << std::endl;
+        std::cout << "... WHERE <col_name> <symbol> <value>" << std::endl;
+        return WhereClause();
     }
-    args.push_back(tokens.at(where_token_index + 2).value); // add symbol to args
+    if (tokens.at(where_token_index + 2).value == SYMBOL_EQ) clause.condition.op = Operator::EQ;
+    else if (tokens.at(where_token_index + 2).value == SYMBOL_NEQ) clause.condition.op = Operator::NEQ;
+    else if (tokens.at(where_token_index + 2).value == SYMBOL_GT) clause.condition.op = Operator::GT;
+    else if (tokens.at(where_token_index + 2).value == SYMBOL_GTE) clause.condition.op = Operator::GTE;
+    else if (tokens.at(where_token_index + 2).value == SYMBOL_LT) clause.condition.op = Operator::LT;
+    else if (tokens.at(where_token_index + 2).value == SYMBOL_LTE) clause.condition.op = Operator::LTE;
+
 
     // Check for correct value
     if (tokens.at(where_token_index + 3).type != Token::LITERAL)
@@ -390,9 +414,27 @@ std::vector<std::string> ts_parser::parse_where_special_arg(std::vector<Token> &
         std::cout << "TinySQL Parser error: Value is not literal" << std::endl;
         std::cout << "Invalid value: " << tokens.at(where_token_index + 3).value << std::endl; 
         std::cout << "literal: number or text inside singles quotes" << std::endl;
-        return std::vector<std::string>();
+        return WhereClause();
     }
-    args.push_back(tokens.at(where_token_index + 3).value); // add value to args
+    clause.condition.value = convert_to_value(tokens.at(where_token_index + 3).value);
 
-    return args;
+
+    return clause;
+}
+
+Value ts_parser::convert_to_value(std::string literal)
+{
+    Value ret;
+
+    if (ts_tokenizer::is_number(literal))
+    {
+        ret = stoi(literal);
+    }
+    else
+    {
+        ret = literal.substr(1, literal.length() - 2); // remove quotes in value
+    }
+
+
+    return ret;
 }

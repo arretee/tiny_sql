@@ -19,29 +19,68 @@
 
 
 
-// Command struct 
 
+// -------------- Condition Struct --------------
 /*
-    // Variables
-    std::string command;                        // One of defined strings in parser.h for engine commands
-    
-    std::string table_name;                     // Table name to work with
-    
-    std::vector<std::string> arguments;         // Default args like col names, values and so on. used for basic command without extintions of WHERE, ORDER BY
-    
-    std::unordered_map<std::string, std::vector<std::string>> special_args; // Special args for WHERE, ORDER BY and similars. 
+    Used for Condition struct
 */
-struct Command{
+enum class Operator {
+    EQ,
+    NEQ,
+    GT,
+    LT,
+    GTE,
+    LTE
+};
+/*
+    Logical condition expretion for some column
+*/
+struct Condition{
     // Variables
-    std::string command;                        // One of defined strings in parser.h for engine commands
-    std::string table_name;                     // Table name to work with
-    std::vector<std::string> arguments;         // Default args like col names, values and so on. used for basic command without extintions of WHERE, ORDER BY
-    std::unordered_map<std::string, std::vector<std::string>> special_args; // Special args for WHERE, ORDER BY and similars. 
+    std::string column_name;
+    Operator op;
+    Value value;
 
-    Command(std::string command, std::string table_name, std::vector<std::string> arguments);
-    Command(std::string command, std::string table_name, std::vector<std::string> arguments,  std::unordered_map<std::string, std::vector<std::string>> special_args);
+    Condition();
+    Condition(std::string column_name, Operator op, Value value);
 
 };
+
+// -------------- Condition Struct --------------
+struct WhereClause{
+    Condition condition;
+
+
+    WhereClause();
+    WhereClause(Condition condition);
+};
+
+
+// -------------- Command struct  --------------
+
+/*
+    Struct with instructions for ts_engine (engine.h)
+
+    // Variables
+    std::string command;                        // One of defined strings in parser.h for engine commands
+    
+    std::string table_name;                     // Table name to work with
+    
+    std::vector<std::string> arguments;         // Default args like col names, values and so on. used for basic command without extintions of WHERE, ORDER BY
+    
+    WhereClause whereClause;                    // Where command instructions
+*/
+    struct Command{
+    // Variables
+    std::string command;                        // One of defined strings in parser.h for engine commands
+    std::string table_name;                     // Table name to work with
+    std::vector<std::string> arguments;         // Default args like col names, values and so on. used for basic command without extintions of WHERE, ORDER BY
+    WhereClause whereClause;                    // Where command instructions
+    Command(std::string command, std::string table_name, std::vector<std::string> arguments);
+    Command(std::string command, std::string table_name, std::vector<std::string> arguments,  WhereClause whereClause);
+
+};
+
 
 /*
     Parser main purpose: Create from tokens that ts_tokenizer created, command for ts_engine.
@@ -111,13 +150,26 @@ namespace ts_parser{
 
 
 
+    // -------------- Parse Special Arguments --------------
     /*
         Function parses WHERE keyword.
 
         input: tokens list, index where a WHERE keyword is used.
         output: vector of strings with 3 values -> {col name, EQUATION_SYMBOL, value}. if returned a empty vector -> error. 
     */
-    std::vector<std::string> parse_where_special_arg(std::vector<Token>& tokens, int where_token_index);
+    WhereClause parse_where_special_arg(std::vector<Token>& tokens, int where_token_index);
+
+
+
+
+    // -------------- Help Functions --------------
+
+    Value convert_to_value(std::string literal);
+
+
+
+
+
 }
 
 

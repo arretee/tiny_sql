@@ -25,10 +25,18 @@
 
 
 // -------------- Symbols of TinySQL --------------
-#define SYMBOL_EQUATION "="
+#define SYMBOL_EQ "="
+#define SYMBOL_NEQ "!="
+#define SYMBOL_GT ">"
+#define SYMBOL_LT "<"
+#define SYMBOL_GTE ">="
+#define SYMBOL_LTE "<="
+
 #define SYMBOL_ALL "*"
 
-#define ALL_SYMBOLS_LIST {SYMBOL_EQUATION, SYMBOL_ALL}
+
+
+#define ALL_SYMBOLS_LIST {SYMBOL_EQ, SYMBOL_NEQ, SYMBOL_ALL, SYMBOL_GT, SYMBOL_LT, SYMBOL_GTE, SYMBOL_LTE}
 
 // -------------- Escaping char for TEXT --------------
 #define ESCAPING_CHAR '\\'
